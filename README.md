@@ -1,1 +1,1 @@
-# SoundTrap---Music-Hub-Prototype
+# SoundTrap - Music-Hub-Prototype
