@@ -1,16 +1,15 @@
-import { supabase } from './lib/supabase'
-import { useEffect } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import './App.css'
 
 function App() {
-  useEffect(() => {
-    const test = async () => {
-      const { data, error } = await supabase.from('tracks').select('*')
-      console.log('connection test:', data, error)
-    }
-    test()
-  }, [])
-
-  return <div>SoundTrap</div>
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
+  )
 }
 
 export default App
