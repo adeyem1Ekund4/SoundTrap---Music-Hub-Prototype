@@ -4,17 +4,23 @@ import TrackCard from '../components/TrackCard/TrackCard'
 import Player from '../components/Player/Player'
 import Upload from '../components/Upload/Upload'
 
-function Home() {
+function Home({ user }) {
   const [tracks, setTracks] = useState([])
-  const [currentTrack, setCurrentTrack] = useState(null)
+  const [currentTrack, setCurrentTrack] = useState(null) // { url, title }
+  const [loading, setLoading] = useState(true)
 
   async function fetchTracks() {
-    const { data, error } = await supabase.from('tracks').select('*')
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('tracks')
+      .select('*, profiles(display_name)')
+      .order('created_at', { ascending: false })
     if (error) {
       console.error('Failed to fetch tracks:', error.message)
-      return
+    } else {
+      setTracks(data)
     }
-    setTracks(data)
+    setLoading(false)
   }
 
   useEffect(() => {
@@ -23,28 +29,30 @@ function Home() {
 
   return (
     <div className="page">
-      <header className="page-header">
-        <h1>SoundTrap</h1>
-      </header>
-
       <main className="main-content">
-        <section className="upload-section">
-          <Upload onUploadSuccess={fetchTracks} />
-        </section>
+        {user && (
+          <section className="upload-section">
+            <Upload onUploadSuccess={fetchTracks} user={user} />
+          </section>
+        )}
 
         <section className="track-list-section">
-          <h2>Your Tracks</h2>
-          {tracks.length === 0 ? (
+          <h2>All Tracks</h2>
+          {loading ? (
+            <div className="spinner-wrap"><span className="spinner" /></div>
+          ) : tracks.length === 0 ? (
             <p className="empty-state">No tracks yet. Upload one above.</p>
           ) : (
             <ul className="track-list">
-              {tracks.map((track) => (
+              {tracks.map((track, i) => (
                 <TrackCard
                   key={track.id}
+                  index={i}
                   title={track.title}
+                  displayName={track.profiles?.display_name}
                   fileUrl={track.file_url}
                   onPlay={setCurrentTrack}
-                  isPlaying={currentTrack === track.file_url}
+                  isPlaying={currentTrack?.url === track.file_url}
                 />
               ))}
             </ul>
@@ -53,7 +61,7 @@ function Home() {
       </main>
 
       <footer className="player-footer">
-        <Player src={currentTrack} />
+        <Player src={currentTrack?.url} title={currentTrack?.title} />
       </footer>
     </div>
   )

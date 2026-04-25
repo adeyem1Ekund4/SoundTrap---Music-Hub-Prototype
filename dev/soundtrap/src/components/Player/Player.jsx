@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 
-function Player({ src }) {
+function Player({ src, title }) {
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -53,20 +53,27 @@ function Player({ src }) {
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => setPlaying(false)}
       />
-      <button className="player-btn" onClick={togglePlay}>
-        {playing ? '⏸' : '▶'}
-      </button>
-      <span className="player-time">{fmt(currentTime)}</span>
-      <input
-        className="player-seek"
-        type="range"
-        min={0}
-        max={duration || 0}
-        step={0.1}
-        value={currentTime}
-        onChange={handleSeek}
-      />
-      <span className="player-time">{fmt(duration)}</span>
+      {title && (
+        <div className="player-track">
+          <span className="player-track-title">{title}</span>
+        </div>
+      )}
+      <div className="player-controls">
+        <button className="player-btn" onClick={togglePlay}>
+          {playing ? '⏸' : '▶'}
+        </button>
+        <span className="player-time">{fmt(currentTime)}</span>
+        <input
+          className="player-seek"
+          type="range"
+          min={0}
+          max={duration || 0}
+          step={0.1}
+          value={currentTime}
+          onChange={handleSeek}
+        />
+        <span className="player-time">{fmt(duration)}</span>
+      </div>
     </div>
   )
 }

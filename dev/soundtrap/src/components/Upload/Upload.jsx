@@ -69,8 +69,8 @@ function Upload({ onUploadSuccess }) {
             disabled={uploading}
           />
         </label>
-        <button onClick={handleUpload} disabled={!selectedFile || uploading}>
-          {uploading ? 'Uploading...' : 'Upload'}
+        <button className="upload-btn" onClick={handleUpload} disabled={!selectedFile || uploading}>
+          {uploading ? 'Uploading…' : 'Upload'}
         </button>
       </div>
       {success && <p className="msg-success">Track uploaded successfully!</p>}
