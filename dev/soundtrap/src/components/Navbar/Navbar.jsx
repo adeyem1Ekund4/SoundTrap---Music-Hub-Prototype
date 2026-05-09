@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
 function Navbar() {
@@ -31,9 +31,21 @@ function Navbar() {
     await supabase.auth.signOut()
   }
 
+  const tabClass = ({ isActive }) =>
+    `navbar-tab${isActive ? ' navbar-tab--active' : ''}`
+
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand">SoundTrap</Link>
+
+      <div className="navbar-tabs">
+        <NavLink to="/" end className={tabClass}>Home</NavLink>
+        <NavLink to="/hub" className={tabClass}>Hub</NavLink>
+        {user && (
+          <NavLink to={`/profile/${user.id}`} className={tabClass}>Profile</NavLink>
+        )}
+      </div>
+
       <div className="navbar-right">
         <button className="btn-theme" onClick={toggleTheme} title="Toggle theme">
           {theme === 'dark' ? '☀' : '☽'}

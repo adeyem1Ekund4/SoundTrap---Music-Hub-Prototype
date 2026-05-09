@@ -6,27 +6,44 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
   async function handleSignIn(e) {
     e.preventDefault()
+    if (!email.trim() || !password) {
+      setError('Email and password are required.')
+      return
+    }
     setError(null)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    if (error) {
-      setError(error.message)
-    } else {
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) throw error
       navigate('/')
+    } catch (err) {
+      setError(err.message || 'Sign in failed. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
   async function handleSignUp(e) {
     e.preventDefault()
+    if (!email.trim() || !password) {
+      setError('Email and password are required.')
+      return
+    }
     setError(null)
-    const { error } = await supabase.auth.signUp({ email, password })
-    if (error) {
-      setError(error.message)
-    } else {
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.signUp({ email, password })
+      if (error) throw error
       navigate('/')
+    } catch (err) {
+      setError(err.message || 'Sign up failed. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -52,11 +69,11 @@ function Login() {
         />
         {error && <p className="login-error">{error}</p>}
         <div className="login-actions">
-          <button type="button" className="btn-primary" onClick={handleSignIn}>
-            Sign in
+          <button type="button" className="btn-primary" onClick={handleSignIn} disabled={loading}>
+            {loading ? 'Signing in…' : 'Sign in'}
           </button>
-          <button type="button" className="btn-secondary" onClick={handleSignUp}>
-            Sign up
+          <button type="button" className="btn-secondary" onClick={handleSignUp} disabled={loading}>
+            {loading ? 'Signing up…' : 'Sign up'}
           </button>
         </div>
       </form>

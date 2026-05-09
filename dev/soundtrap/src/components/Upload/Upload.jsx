@@ -18,42 +18,42 @@ function Upload({ onUploadSuccess }) {
   async function handleUpload() {
     if (!selectedFile) return
 
+    if (selectedFile.size > 50 * 1024 * 1024) {
+      setError('File is too large. Maximum size is 50 MB.')
+      return
+    }
+
     setUploading(true)
     setError(null)
     setSuccess(false)
 
-    const filename = `${Date.now()}_${selectedFile.name}`
+    try {
+      const filename = `${Date.now()}_${selectedFile.name}`
 
-    const { error: storageError } = await supabase.storage
-      .from('tracks')
-      .upload(filename, selectedFile)
+      const { error: storageError } = await supabase.storage
+        .from('tracks')
+        .upload(filename, selectedFile)
 
-    if (storageError) {
-      setError(storageError.message)
+      if (storageError) throw new Error(storageError.message)
+
+      const { data: urlData } = supabase.storage
+        .from('tracks')
+        .getPublicUrl(filename)
+
+      const { error: dbError } = await supabase
+        .from('tracks')
+        .insert({ title: selectedFile.name, file_url: urlData.publicUrl })
+
+      if (dbError) throw new Error(dbError.message)
+
+      setSuccess(true)
+      setSelectedFile(null)
+      if (onUploadSuccess) onUploadSuccess()
+    } catch (err) {
+      setError(err.message || 'Upload failed. Please try again.')
+    } finally {
       setUploading(false)
-      return
     }
-
-    const { data: urlData } = supabase.storage
-      .from('tracks')
-      .getPublicUrl(filename)
-
-    const fileUrl = urlData.publicUrl
-
-    const { error: dbError } = await supabase
-      .from('tracks')
-      .insert({ title: selectedFile.name, file_url: fileUrl })
-
-    if (dbError) {
-      setError(dbError.message)
-      setUploading(false)
-      return
-    }
-
-    setUploading(false)
-    setSuccess(true)
-    setSelectedFile(null)
-    if (onUploadSuccess) onUploadSuccess()
   }
 
   return (

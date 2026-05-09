@@ -16,21 +16,25 @@ function Profile() {
     async function load() {
       setLoading(true)
       setError(null)
-
-      const [{ data: profileData, error: profileError }, { data: trackData }] =
-        await Promise.all([
+      try {
+        const [
+          { data: profileData, error: profileError },
+          { data: trackData, error: trackError },
+        ] = await Promise.all([
           supabase.from('profiles').select('display_name, bio').eq('id', id).single(),
           supabase.from('tracks').select('*').eq('user_id', id).order('created_at', { ascending: false }),
         ])
 
-      if (profileError) {
-        setError('Profile not found.')
-      } else {
+        if (profileError) throw new Error('Profile not found.')
+        if (trackError) throw new Error('Could not load tracks.')
+
         setProfile(profileData)
         setTracks(trackData ?? [])
+      } catch (err) {
+        setError(err.message || 'Something went wrong.')
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
 
     load()
